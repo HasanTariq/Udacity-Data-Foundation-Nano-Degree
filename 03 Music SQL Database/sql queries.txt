@@ -1,0 +1,73 @@
+/* Query used to generate first insight  */
+
+SELECT
+  i.billingCountry AS Country,
+  g.name AS Gener,
+  COUNT(*) AS count
+FROM invoice i
+JOIN InvoiceLine il
+  ON i.InvoiceId = il.InvoiceId
+JOIN Track t
+  ON t.TrackId = il.TrackId
+JOIN Genre g
+  ON g.genreId = t.genreId
+GROUP BY i.billingCountry,
+         g.name
+ORDER BY i.billingCountry
+
+
+
+
+/* Query used to generate second insight  */
+
+  SELECT country, max(total_spending), month FROM (
+  
+  SELECT
+  c.country,
+  SUM(i.total) AS total_spending,
+  strftime('%m', i.invoiceDate) AS Month
+FROM Invoice i
+JOIN customer c
+  ON i.customerId = c.customerId
+GROUP BY c.country, Month
+ORDER BY c.country, total_spending desc, Month 
+)
+GROUP BY country
+
+
+
+
+
+/* Query used to generate third insight  */
+
+SELECT
+  c.city,
+  SUM(i.total)
+FROM Invoice i
+JOIN customer c
+  ON i.customerId = c.customerId
+GROUP BY c.city
+ORDER BY SUM(i.total) DESC
+
+
+
+
+/* Query used to generate third insight  */
+
+SELECT
+  ar.Name,
+  COUNT(*)
+FROM Invoice i
+JOIN InvoiceLine il
+  ON il.invoiceId = i.invoiceId
+JOIN customer c
+  ON i.customerId = c.customerId
+JOIN Track t
+  ON t.trackId = il.trackId
+JOIN Album a
+  ON a.albumId = t.albumId
+JOIN Artist ar
+  ON ar.artistId = a.artistId
+WHERE c.city = 'Prague'
+GROUP BY ar.Name
+ORDER BY COUNT(*) DESC;
